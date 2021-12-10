@@ -25,7 +25,7 @@ light1 = LED(light1_pin,False,False)    #set light1 GPIO output pin
 light2 = LED(light2_pin,False,False) #set light 2 GPIO pin
 light3 = LED(light3_pin,False,False) #set light 3 GPIO pin
 light4 = LED(light4_pin,False,False) #set light4 GPIO pin
-water_level=Button(3)       #set water level sensor pin
+water_level=Button(float_pin)       #set water level sensor pin
 
 #function to get probe temperatures
 def get_temp(probeID):
