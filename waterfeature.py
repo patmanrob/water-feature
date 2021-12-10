@@ -27,8 +27,7 @@ light3 = LED(light3_pin,False,False) #set light 3 GPIO pin
 light4 = LED(light4_pin,False,False) #set light4 GPIO pin
 water_level=Button(float_pin)       #set water level sensor pin
 
-#function to get probe temperatures
-def get_temp(probeID):
+def get_temp(probeID):                 #function to get probe temperatures
     tempfile= open("/sys/bus/w1/devices/"+probeID+"/w1_slave")
     thetext=tempfile.read()
     tempfile.close()
@@ -36,9 +35,8 @@ def get_temp(probeID):
     temp = float(tempdata[2:])
     temp = temp / 1000
     return temp
-    
-#function to send notification emails
-def send_email(body):
+
+def send_email(body):                  #function to send notification emails
     print "\nSending email at " + str(datetime.now()) + " with content:\n" + body
     msg = MIMEMultipart()
     msg["From"] = email_user
@@ -54,9 +52,7 @@ def send_email(body):
     body=""
     print "email sent successfully\n"
 
-
-#function to get and parse sunrise-sunset data
-def get_todays_data():
+def get_todays_data():                 #function to get and parse sunrise-sunset data
     global schedule
     global sunrise
     global status
@@ -90,8 +86,7 @@ def get_todays_data():
     schedule = schedule + "\nLight4 on time = " + str(astro_time) + "Light 4 off time = " + str(off4)
     schedule = schedule + "\nReceived data is " + status
 
-#function to turn devices on
-def switch_device_on(device):
+def switch_device_on(device):          #function to turn devices on
     global body
     if not device.is_active:
         print "The " + d_name + " is off"
@@ -99,8 +94,7 @@ def switch_device_on(device):
         print "and I turned the " + d_name +" on at " + str(time_now)
         body = body + "\nThe " + d_name + " was turned on at " + str(time_now)
 
-#function to turn devices off
-def switch_device_off(device):
+def switch_device_off(device):         #function to turn devices off
     global body
     if device.is_active:
         print "The " + d_name + " is on"
@@ -108,15 +102,13 @@ def switch_device_off(device):
         print "and I turned the " + d_name + " Off at " + str(time_now)
         body = body + "\nThe " + d_name + " turned off at " +str(time_now)
    
-#function to set devices on and off
-def on_off(device, on_time, off_time):
+def on_off(device, on_time, off_time): #function to set devices on and off
     if on_time < time_now and time_now < off_time:
         switch_device_on(device)
     else:
         switch_device_off(device)    
         
-#function to get location based on external ip address
-def get_url():
+def get_url():                         #function to get location based on external ip address
     global url
     findip = requests.get(ipapi)                # get fountain's web ip address
     ipdata = json.loads(findip.content)         #parse response 
@@ -134,8 +126,7 @@ def get_url():
     print url
     return url
     
-#function to startup fountain    
-def startup_sequence():
+def startup_sequence():                #function to startup fountain  
     global url
     #Starup sequence
     print "Startup sequence" #cycle everyting on and off
