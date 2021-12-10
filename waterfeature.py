@@ -14,28 +14,18 @@ from email import encoders
 
 #initial constants and variables
 from fountainvariables import *
-
 fountain_off=time(23,00,21)
 off1=time(23,00,28)
 off2=time(23,00,14)
 off3=time(23,00,07)
 off4=time(23,00,00)
 #setup GPIO pins
-
-fountain = LED(26,False,False) #set fountain GPIO output pin fountain is on 26
-light1 = LED(6,False,False)    #set light1 GPIO output pin
-light2 = LED(13,False,False) #set light 2 GPIO pin
-light3 = LED(19,False,False) #set light 3 GPIO pin
-light4 = LED(22,False,False) #set light4 GPIO pin
+fountain = LED(fountain_pin,False,False) #set fountain GPIO output pin
+light1 = LED(light1_pin,False,False)    #set light1 GPIO output pin
+light2 = LED(light2_pin,False,False) #set light 2 GPIO pin
+light3 = LED(light3_pin,False,False) #set light 3 GPIO pin
+light4 = LED(light4_pin,False,False) #set light4 GPIO pin
 water_level=Button(3)       #set water level sensor pin
-
-#setup ds18b20 temperature variables
-probe1="28-02129245272c"
-probe2="28-02149245948f"
-temp1=0
-temp1_old=0
-temp2=0
-temp2_old=0
 
 #function to get probe temperatures
 def get_temp(probeID):
@@ -49,22 +39,21 @@ def get_temp(probeID):
     
 #function to send notification emails
 def send_email(body):
-    if send:
-        print "\nSending email at " + str(datetime.now()) + " with content:\n" + body
-        msg = MIMEMultipart()
-        msg["From"] = email_user
-        msg["To"] = email_send
-        msg["Subject"] = "Alert from fountain at " + str(datetime.now())
-        msg.attach(MIMEText(body,"plain"))
-        text = msg.as_string()
-        server = smtplib.SMTP("smtp.gmail.com",587)
-        server.starttls()
-        server.login(email_user,email_password)
-        server.sendmail(email_user,email_send,text)
-        server.quit()
-        print "email sent successfully\n"
-    else:
-        print "emails disabled"
+    print "\nSending email at " + str(datetime.now()) + " with content:\n" + body
+    msg = MIMEMultipart()
+    msg["From"] = email_user
+    msg["To"] = email_send
+    msg["Subject"] = "Alert from fountain at " + str(datetime.now())
+    msg.attach(MIMEText(body,"plain"))
+    text = msg.as_string()
+    server = smtplib.SMTP("smtp.gmail.com",587)
+    server.starttls()
+    server.login(email_user,email_password)
+    server.sendmail(email_user,email_send,text)
+    server.quit()
+    body=""
+    print "email sent successfully\n"
+
 
 #function to get and parse sunrise-sunset data
 def get_todays_data():
@@ -118,14 +107,38 @@ def switch_device_off(device):
         device.off()
         print "and I turned the " + d_name + " Off at " + str(time_now)
         body = body + "\nThe " + d_name + " turned off at " +str(time_now)
-     
-
+   
+#function to set devices on and off
+def on_off(device, on_time, off_time):
+    if on_time < time_now and time_now < off_time:
+        switch_device_on(device)
+    else:
+        switch_device_off(device)    
+        
+#function to get location based on external ip address
+def get_url():
+    global url
+    findip = requests.get(ipapi)                # get fountain's web ip address
+    ipdata = json.loads(findip.content)         #parse response 
+    ipaddress= ipdata['ip']                     # extract ip address
+    findloc = requests.get(latlongapi+ipaddress)#get location from ip
+    locdata = json.loads(findloc.content)       #parse response
+    lat= locdata['lat']                         #extract latitude
+    lon=locdata['lon']                          #extract longitude
+    
+    print('lat Data ')
+    print(lat)
+    print('lon Data ')
+    print(lon)
+    url=url+str(lat)+'&lng='+str(lon)+'&formatted=0'    #create url to query sunrise/sunset data
+    print url
+    return url
+    
+#function to startup fountain    
 def startup_sequence():
-    
+    global url
     #Starup sequence
-    print "Startup sequence"
-    
-    #cycle everyting on and off
+    print "Startup sequence" #cycle everyting on and off
     fountain.on()
     light1.on()
     light2.on()
@@ -139,8 +152,8 @@ def startup_sequence():
     light3.off()
     light4.off()
     print "All off"
-    sleep(1)
-    get_todays_data()
+    url=get_url() #create url to query sunrise/sunset
+    get_todays_data() # query sunrise/sunset and create schedule
     print schedule
     send_email(schedule)
     sleep(1)
@@ -148,41 +161,29 @@ def startup_sequence():
 
 #main loop
 if __name__ == "__main__":
-    
     try:
         startup_sequence()
         while True:
-            
+            while not water_level.is_pressed:
+                print('water level is low')
+                d_name="fountain"
+                switch_device_off(fountain)
+                body="The water level in the fountain is too low!"
+                send_email(body)
+                water_level.wait_for_press()
+            else:
+                print('Water Level is good')
+            print(water_level.is_pressed)
             #update current time and date
             body = "" #empty email body
             d = datetime.now()
             today_date = d.date()
             time_now = d.time()
-            time_now = time_now.replace(microsecond=0)
+            time_now = time_now.replace(microsecond=0) # get rid of microseconds to shorten email lines
             temp1 = get_temp(probe1)
             temp2 = get_temp(probe2)
             
-            #check if air is freezing
-            #if temp1<=0 and temp1_old>0:
-            #    #body=body + "The Air Probe temperature is fallen below Zero "
-            #    temp1_old = temp1
-            
-            #check if air has gone above freezing
-            #if temp1>=0.1 and temp1_old<0.1:
-            #    #body + body + "The air probe temperature has risen above Zero "
-            #    temp1_old=temp1
-                
-            #check if water is freezing
-            #if temp2<=0 and temp2_old>0:
-            #    #body=body + "The water Probe temperature is fallen below Zero "
-            #    temp2_old = temp2
-            
-            #check if water has gone above freezing
-            #if temp2>=0.1 and temp2_old<0.1:
-            #    #body + body + "The water probe temperature has risen above Zero "
-            #    temp2_old=temp2
-               
-            
+
             
             #check for probe 1 (air)temperature change
             if temp1 >= (temp1_old+3):
@@ -207,56 +208,48 @@ if __name__ == "__main__":
                     temp2_old = temp2
     
         
+        
+
+            
             # fountain on from sunrise to fountain_off
-            d_name = "Fountain"
-            if sunrise_time < time_now and time_now < fountain_off:
-                switch_device_on(fountain)
-            else:
-                switch_device_off(fountain)
-                    
-                    
+            d_name="Fountain"
+            on_off(fountain, sunrise_time, fountain_off)
+            
             # Light 1 on from sunset to off1
             d_name = "Light 1"
-            if sunset_time < time_now and time_now < off1:
-                switch_device_on(light1)
-            else:
-                switch_device_off(light1)
-                
+            on_off(light1, sunset_time, off1)
+            
             # Light 2 on from  civil sunset to off2
             d_name = "Light 2"
-            if civil_time < time_now and time_now < off2:
-                switch_device_on(light2)
-            else:
-                switch_device_off(light2)
-                 
+            on_off(light2, civil_time, off2)
+            
             # Light 3 on from  Nautical sunset to off3
             d_name = "Light 3"
-            if nautical_time < time_now and time_now < off3:
-                switch_device_on(light3)
-            else:
-                switch_device_off(light3)
-               
+            on_off(light3, nautical_time, off3)
+            
             # Light 4 on from Astronomical sunset to off4
             d_name = "Light 4"
-            if astro_time < time_now and time_now < off4:
-                switch_device_on(light4)
-            else:
-                switch_device_off(light4)
-    
+            on_off(light4, astro_time, off4)
+
             #check for out of date sunrise-sunset data and update if neccessary
             if str(sunrise[0:10]) != str(today_date):
-                print "Date has changed"
+                print ("Date has changed")
                 get_todays_data()
                 body = body + "Data has been renewed\nNew schedule is: \n" + schedule
+                send_email(body)
+
                 
             #if there is any text in body email it to user
             if body != "":
-                cpu=CPUTemperature()
-                cpu_temp=cpu.temperature
-                body = body + "\nPi Core temperature is " + str(cpu_temp) + " C."
-                body = body + "\nAir Temp is " + str(temp1) + " C."
-                body = body + "\nWater Temp is " + str(temp2) + " C."
-                send_email(body)
+                if send:
+                    cpu=CPUTemperature()
+                    cpu_temp=cpu.temperature
+                    body = body + "\nPi Core temperature is " + str(cpu_temp) + " C."
+                    body = body + "\nAir Temp is " + str(temp1) + " C."
+                    body = body + "\nWater Temp is " + str(temp2) + " C."
+                    send_email(body)
+                else:
+                    print("emails disabled")
                 
             #run the loop every 6 seconds
             sleep(6)
