@@ -13,7 +13,7 @@ light1_pin = 6						#GPIO pin number light 1 is controlled by
 light2_pin = 13						#GPIO pin number light 2 is controlled by
 light3_pin = 19						#GPIO pin number light 3 is controlled by
 light4_pin = 22						#GPIO pin number light 4 is controlled by
-
+float_pin = 3             #GPIO pin number for float switch
 body=""							#empty string for email body to be stored in
 temp1=0							#global variable for temp 1
 temp1_old=0						#global variable for previous temp 1
