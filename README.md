@@ -17,6 +17,9 @@ Control consists of Raspberry Pi.
 
 It's just a water feature but I an working to make it as unnecessarily complicated as possible, in a style similar to both Heath-Robinson and Goldberg.
 
+## Phase 0
+Before starting on this project I had already constructed a water feature. It had no control other than plugging the pump in.
+
 ## Phase 1
 The first phase was to **control the power of the pump via a relay** using a Raspberry Pi.
 
