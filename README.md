@@ -1,9 +1,8 @@
 # Raspberry Pi controlled Water Feature
-Code for raspberry pi controlled water feature (HRG1)
-<img alt="Water Feature HRG1" title="HRG1" src="./water-feature/images/IMG_1175.jpg" width="280" />
-[![Water](./water-feature/images/IMG_1175.jpg)]
 
-## Water feature consists of water reservoir, pump, tube and a cascade.
+<img alt="Water Feature HRG1" title="HRG1" src="https://github.com/patmanrob/water-feature/blob/main/images/IMG_1175.JPG" width="280" />
+
+ Water feature consists of water reservoir, pump, tube and a cascade.
 
 Control consists of Raspberry Pi. 
 
@@ -16,7 +15,7 @@ Control consists of Raspberry Pi.
 
 **The HRG1 is named in honour of Heath-Robinson and Rube Goldberg.**  
 
-It's just a water feature but I an working to make it as un-neccissarily complicated as possible, in a style similar to both Heath-Robinson and Goldberg.
+It's just a water feature but I an working to make it as unnecessarily complicated as possible, in a style similar to both Heath-Robinson and Goldberg.
 
 ## Phase 1
 The first phase was to **control the power of the pump via a relay** using a Raspberry Pi.
