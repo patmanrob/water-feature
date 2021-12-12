@@ -12,6 +12,8 @@ Control consists of Raspberry Pi.
 
 1 floating level switch.
 
+The water feature control was written in python and took advantage of the Raspberry Pi's GPIO pins for controling the physical elements,Requests library for interrogating the internet for data, email libraries for sending information and time / datetime libraries for handing the times the water feature operates.
+
 
 **The HRG1 is named in honour of Heath-Robinson and Rube Goldberg.**  
 
