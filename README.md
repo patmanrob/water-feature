@@ -1,6 +1,7 @@
 # Raspberry Pi controlled Water Feature
 Code for raspberry pi controlled water feature (HRG1)
-[![image](./images/IMG_1175.jpg)]
+<img alt="Water Feature HRG1" title="HRG1" src="images/IMG_1175.jpg" width="280" />
+[![Water](images/IMG_1175.jpg)]
 
 ## Water feature consists of water reservoir, pump, tube and a cascade.
 
